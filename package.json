@@ -1,0 +1,19 @@
+{
+  "name": "turso-basic",
+  "version": "0.0.1",
+  "description": "Getting a feel for turso",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["turso", "sqlite", "nodejs"],
+  "author": "Andrew Bloese",
+  "license": "ISC",
+  "dependencies": {
+    "@libsql/client": "^0.5.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-session": "^1.18.0"
+  }
+}
