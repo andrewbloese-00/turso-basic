@@ -59,6 +59,39 @@ async function insertOne(name, product_id, variant_type_id, price_mod = 0) {
   }
 }
 
+/**
+ * @param {number} id the id of the product to be updated.
+ * @param {{variant_name?:string,price_mod?:number}} productVariantUpdate the updates permissible on the product table.
+ * @note if name is updated, then slug is automatically updated.
+ * @about allows updating the 'name', 'desscription', and 'price' of a product.
+ * @returns {Promise<{product:Product, error:undefined}|{product: undefined, error:unknown}>}
+ */
+async function updateOne(id, productVariantUpdate) {
+  try {
+    const setters = [];
+    const args = [];
+    if (productVariantUpdate.variant_name) {
+      setters.push("variant_name=?");
+      args.push(productVariantUpdate.variant_name);
+    }
+    if (productVariantUpdate.price_mod) {
+      //round price to money format
+      const pm = Number(productVariantUpdate.price.toFixed(2));
+      setters.push("price=?");
+      args.push(pm);
+    }
+    args.push(id);
+    const sql = `UPDATE ProductVariants SET ${setters.join(",")} WHERE id = ? RETURNING *;`;
+    console.log("UPDATE SQL: ", sql);
+    const response = await turso.execute({ sql, args });
+    const variant = translateRow(response.rows[0], response.columns);
+    return { variant };
+  } catch (error) {
+    console.error(error);
+    return { error };
+  }
+}
+
 //creates the product variants table
 export const ProductVariantInitializer = async () => {
   return turso.execute(
@@ -74,4 +107,5 @@ export const ProductVariantInitializer = async () => {
 export const ProductVariant = {
   insertOne,
   getVariants,
+  updateOne,
 };

@@ -22,9 +22,20 @@ async function testJoin() {
   return PASS("JOIN Variants", variants);
 }
 
+async function testUpdate() {
+  console.time("Variant Update");
+  const { variant, error } = await ProductVariant.updateOne(1, {
+    variant_name: "Small",
+  });
+  console.timeEnd("Variant Update");
+  if (error) return FAIL("Variant Update", error);
+  return PASS("Variant Update", variant);
+}
+
 async function main() {
   await ProductVariantInitializer();
   // await testInsertSingle();
   await testJoin();
+  await testUpdate();
 }
 main();
