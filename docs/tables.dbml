@@ -1,0 +1,41 @@
+//paste into dbdiagram.io for visualization
+
+Table Products {
+  id integer [primary key]
+  name text [not null]
+  slug text [not null, unique]
+  price real [default: 0]
+  description text [not null]
+}
+
+Table ProductVariants {
+  id integer [primary key]
+  product_id integer
+  variant_name text
+  variant_type text
+  price_mod real [default: 0]
+}
+
+Table ProductVariantTypes {
+  id integer [primary key]
+  name text [unique, not null]
+  description text [not null]
+}
+
+Table ProductImages {
+    id integer [primary key]
+    alt_text text [not null]
+    product_id int
+    variant_id int
+}
+
+Table ProductMetadata {
+    product_id int
+    meta_name text NOT NULL
+    meta_content text NOT NULL
+}
+
+
+Ref: "ProductVariants"."product_id" > "Products"."id"
+
+Ref: "ProductVariants"."variant_type" < "ProductVariantTypes"."id"
