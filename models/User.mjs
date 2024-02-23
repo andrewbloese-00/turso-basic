@@ -1,11 +1,11 @@
-//Product functions
+//User Functions
 import { turso } from "../turso-client.mjs";
 import { translateRow } from "../utils/fromRows.mjs";
 import { verifyHash, hashPassword } from "../utils/passwordHash.mjs";
 /**
- * @typedef {{id: number, name: string, price: number,description: string}} Product
+ * @typedef {{id: number, name: string, email: string: password}} ServerOnlyUser
+ * @typedef {{id:number, name:string, email:string}} ClientUser
  */
-
 //note that the password field is hashed before being sent to db
 const userSchema = `
    id INTEGER PRIMARY KEY,
@@ -15,7 +15,7 @@ const userSchema = `
  `;
 
 /**
- * @param {string} slug the unique slug of the Product
+ * @param {string} id the users unique id
  */
 async function getById(id) {
   try {
@@ -31,7 +31,10 @@ async function getById(id) {
 }
 
 /**
- * @param {string} name
+ * @param {string} name the users name
+ * @param {string} email a valid & unique email
+ * @param {string} password a secure password that will be hashed prior to being saved to the database
+ * @returns {Promise<{}>}
  */
 async function signup(name, email, password) {
   try {
@@ -49,20 +52,22 @@ async function signup(name, email, password) {
   }
 }
 
+/**
+ * @param {string} email the users email
+ * @param {string} password the users password
+ * @returns { Promise<{error:unknown}|{token:string}>}
+ */
 async function signin(email, password) {
   try {
-    // step 1: find user matching email
     const query = await turso.execute({
       sql: "SELECT * FROM Users WHERE email = ?",
       args: [email],
     });
-
-    // See if the password matches
     if (!query.rows.length) throw new Error("user not found");
     const user = translateRow(query.rows[0], query.columns);
     const valid = await verifyHash(password, user.password);
     if (!valid) throw new Error("Invalid Credentials");
-    // TODO: if does return a token
+    //TODO: implement tokens instead of raw ID
     return { token: user.id };
   } catch (error) {
     console.error(error);
@@ -70,13 +75,12 @@ async function signin(email, password) {
   }
 }
 
-//creates the product table
-
+//creates the user table
 export const UserInitializer = async () => {
   return turso.execute(`CREATE TABLE IF NOT EXISTS Users (${userSchema})`);
   //todo: make batch to set up indexes as well
   // return turso.batch([
-  //   `CREATE TABLE IF NOT EXISTS Products (${productSchema})`,
+  //   `CREATE TABLE IF NOT EXISTS Users (${productSchema})`,
   //   `CREATE INDEX ...`,
   // ])
 };
