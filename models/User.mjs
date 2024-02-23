@@ -20,7 +20,7 @@ const userSchema = `
 async function getById(id) {
   try {
     const resultSet = await turso.execute({
-      sql: `SELECT (id,name,email) FROM Users WHERE id = id`,
+      sql: `SELECT (id,name,email) FROM Users WHERE id = id;`,
       args: [id],
     });
     const user = translateRow(resultSet.rows[0], resultSet.columns);
@@ -40,7 +40,7 @@ async function signup(name, email, password) {
   try {
     const passwordHash = await hashPassword(password);
     const result = await turso.execute({
-      sql: `INSERT INTO Users ( name, email, password ) VALUES ( ? , ? , ? )`,
+      sql: `INSERT INTO Users ( name, email, password ) VALUES ( ? , ? , ? ) RETURNING id, name, email;`,
       args: [name, email, passwordHash],
     });
     //TODO generate token - dont just return id...

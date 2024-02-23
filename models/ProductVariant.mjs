@@ -47,24 +47,11 @@ async function getVariants(product_id) {
 
 async function insertOne(name, product_id, variant_type_id, price_mod = 0) {
   try {
-    console.log("INPUT: ", { name, product_id, variant_type_id });
     const response = await turso.execute({
-      sql: "INSERT INTO ProductVariants ( product_id, variant_name, variant_type, price_mod ) VALUES ( ? , ? , ?, ? )",
+      sql: "INSERT INTO ProductVariants ( product_id, variant_name, variant_type, price_mod ) VALUES ( ? , ? , ?, ? ) RETURNING *;",
       args: [product_id, name, variant_type_id, price_mod],
     });
-
-    console.log("response", response);
-
-    const variantResponse = await turso.execute({
-      sql: "SELECT * FROM ProductVariants WHERE id = ?",
-      args: [response.lastInsertRowid],
-    });
-
-    const variant = translateRow(
-      variantResponse.rows[0],
-      variantResponse.columns,
-    );
-
+    const variant = translateRow(response.rows[0], response.columns);
     return { variant };
   } catch (error) {
     console.error(error);

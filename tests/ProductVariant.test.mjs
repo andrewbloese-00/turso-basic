@@ -7,9 +7,6 @@ import { Divider, FAIL, PASS } from "./fmt.mjs";
 async function testInsertSingle() {
   Divider("TEST: INSERT");
   console.time("Create new Product Variant");
-  const product_id = 1,
-    variant_type_id = 1;
-
   const { variant, error } = await ProductVariant.insertOne("Medium", 1, 1);
   console.timeEnd("Create new Product Variant");
   Divider("RESULT: INSERT ONE");

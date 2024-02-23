@@ -19,19 +19,13 @@ async function createOne(name, description) {
   console.log({ name, description });
   try {
     const response = await turso.execute({
-      sql: "INSERT INTO ProductVariantTypes (name,description) VALUES ( ? , ? );",
+      sql: "INSERT INTO ProductVariantTypes (name,description) VALUES ( ? , ? ) RETURNING *;",
       args: [name, description],
-    });
-    const variantId = response.lastInsertRowid;
-    console.log("VARIANT ID", variantId);
-    const getInserted = await turso.execute({
-      sql: "SELECT * FROM ProductVariantTypes WHERE id = ?;",
-      args: [variantId],
     });
 
     const product_variant_type = translateRow(
-      getInserted.rows[0],
-      getInserted.columns,
+      response.rows[0],
+      response.columns,
     );
     return { product_variant_type };
   } catch (error) {
@@ -62,10 +56,9 @@ async function getById(id) {
 
 //creates the product variants table
 export const ProductVariantTypesInitializer = async () => {
-  const stmt = `CREATE TABLE IF NOT EXISTS ProductVariantTypes (${productVariantTypesSchema});`;
-  console.log("INITIALIZER\n\n", stmt);
-
-  return turso.execute(stmt);
+  return turso.execute(
+    `CREATE TABLE IF NOT EXISTS ProductVariantTypes (${productVariantTypesSchema});`,
+  );
   //todo: make batch to set up indexes as well
   // return turso.batch([
   //   `CREATE TABLE IF NOT EXISTS Products (${productSchema})`,
