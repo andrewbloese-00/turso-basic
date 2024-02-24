@@ -60,11 +60,10 @@ async function insertOne(name, product_id, variant_type_id, price_mod = 0) {
 }
 
 /**
- * @param {number} id the id of the product to be updated.
+ * @param {number} id the id of the product variant to be updated.
  * @param {{variant_name?:string,price_mod?:number}} productVariantUpdate the updates permissible on the product table.
- * @note if name is updated, then slug is automatically updated.
- * @about allows updating the 'name', 'desscription', and 'price' of a product.
- * @returns {Promise<{product:Product, error:undefined}|{product: undefined, error:unknown}>}
+ * @about allows updating the 'name', and 'price_mod' of a product variant.
+ * @returns {Promise<{variant:ProductVariant, error:undefined}|{variant: undefined, error:unknown}>}
  */
 async function updateOne(id, productVariantUpdate) {
   try {
