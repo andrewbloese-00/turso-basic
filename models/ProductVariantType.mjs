@@ -43,11 +43,38 @@ async function getById(id) {
       sql: "SELECT * FROM ProductVariantTypes WHERE id = ?",
       args: [id],
     });
-    const product_variant_type = translateRow(
-      response.rows[0],
-      response.columns,
-    );
-    return { product_variant_type };
+    const variant_type = translateRow(response.rows[0], response.columns);
+    return { variant_type };
+  } catch (error) {
+    console.error(error);
+    return { error };
+  }
+}
+
+/**
+ * @param {number} id the id of the product to be updated.
+ * @param {{name?:string,description?:string}} productVariantTypeUpdate the updates permissible on the ProductVariantTypes table.
+ * @about allows updating the 'name', or 'description' of a product variant type.
+ * @returns {Promise<{product_variant:Product, error:undefined}|{product: undefined, error:unknown}>}
+ */
+async function updateOne(id, productVariantTypeUpdate) {
+  try {
+    const setters = [];
+    const args = [];
+    if (productVariantTypeUpdate.name) {
+      setters.push("name=?");
+      args.push(productVariantTypeUpdate.name);
+    }
+    if (productVariantTypeUpdate.description) {
+      //round price to money format
+      setters.push("description=?");
+      args.push(productVariantTypeUpdate.description);
+    }
+    args.push(id);
+    const sql = `UPDATE ProductVariantTypes SET ${setters.join(",")} WHERE id = ? RETURNING *;`;
+    const response = await turso.execute({ sql, args });
+    const variant_type = translateRow(response.rows[0], response.columns);
+    return { variant_type };
   } catch (error) {
     console.error(error);
     return { error };
@@ -69,4 +96,5 @@ export const ProductVariantTypesInitializer = async () => {
 export const ProductVariantType = {
   createOne,
   getById,
+  updateOne,
 };
