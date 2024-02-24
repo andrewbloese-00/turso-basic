@@ -2,6 +2,7 @@ import {
   ProductVariant,
   ProductVariantInitializer,
 } from "../models/ProductVariant.mjs";
+import { turso } from "../turso-client.mjs";
 import { Divider, FAIL, PASS } from "./fmt.mjs";
 
 async function testInsertSingle() {
@@ -32,10 +33,23 @@ async function testUpdate() {
   return PASS("Variant Update", variant);
 }
 
-async function main() {
+export async function DropProductVariants() {
+  Divider("Cleanup");
+  try {
+    await turso.execute("DROP TABLE ProductVariants");
+    console.log("successfully dropped test data");
+  } catch (error) {
+    console.warn("Failed to Cleanup ProductVariants... ");
+    console.error(error);
+    return false;
+  }
+}
+
+export async function ProductVariantsTests() {
+  console.time("Initialize Product Variants");
   await ProductVariantInitializer();
-  // await testInsertSingle();
+  console.timeEnd("Initialize Product Variants");
+  await testInsertSingle();
   await testJoin();
   await testUpdate();
 }
-main();

@@ -1,11 +1,16 @@
 import { Product, ProductInitializer } from "../models/Product.mjs";
 import { config } from "dotenv";
 import { PASS, FAIL, Divider } from "./fmt.mjs";
+import { turso } from "../turso-client.mjs";
 config();
-async function TestProduct() {
+export async function TestProducts() {
   await ProductInitializer();
+  await testInsertOne();
   await testGetSlug();
   await testUpdateOne();
+  await testInsertMany();
+  await testGetAll();
+  await testGetCategory();
 }
 
 async function testGetSlug() {
@@ -30,11 +35,78 @@ async function testUpdateOne() {
 }
 
 async function testInsertOne() {
-  const p1 = await Product.insertOne(
+  Divider("Product Insert One");
+  const { product, error } = await Product.insertOne(
     "Test Product",
     124.99,
-    "A test productsx",
+    "A test product",
+    "test",
   );
+  if (error) return FAIL("Insert One Product", product);
+  return PASS("Insert One Product", product);
 }
 
-TestProduct();
+async function testInsertMany() {
+  Divider("Product Insert Many ");
+  console.time("Insert Many Products");
+  const { products, error } = await Product.insertMany(
+    [
+      {
+        name: "Graphic T-Shirt",
+        price: 24.99,
+        description: "A t-shirt with a pattern printed on it",
+        category: "Apparel",
+      },
+      {
+        name: "Super Comfortable Pants",
+        price: 24.99,
+        description: "The most comfortable pants ever.",
+        category: "Apparel",
+      },
+      {
+        name: "You're not my dad - dad cap",
+        price: 24.99,
+        description: 'Dad Cap With The Text "you\'re not my dad" on it',
+        category: "Apparel",
+      },
+    ],
+    true,
+  );
+  console.timeEnd("Insert Many Products");
+  if (error) return FAIL("Insert Many Products", error);
+  return PASS("Insert Many Products", products);
+}
+
+async function testGetCategory() {
+  Divider("Get Products Category");
+  console.time("Get Products Category");
+  const { products, error } = await Product.getCategory(
+    "Apparel",
+    "name",
+    "ASC",
+  );
+  console.timeEnd("Get Products Category");
+  if (error) return FAIL("Get Products Category", error);
+  return PASS("Get Products Category", products);
+}
+
+async function testGetAll() {
+  Divider("Get All Products");
+  console.time("Get All Products ");
+  const { products, error } = await Product.getAll("name", "ASC");
+  console.timeEnd("Get All Products ");
+  if (error) return FAIL("Get All Products", error);
+  return PASS("Get All Products", products);
+}
+
+export async function DropProducts() {
+  Divider("Cleanup Products");
+  try {
+    await turso.execute("DROP TABLE Products");
+    console.log("successfully dropped test data");
+  } catch (error) {
+    console.warn("Failed to Cleanup ProductVariants... ");
+    console.error(error);
+    return false;
+  }
+}

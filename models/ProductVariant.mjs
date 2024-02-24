@@ -81,7 +81,6 @@ async function updateOne(id, productVariantUpdate) {
     }
     args.push(id);
     const sql = `UPDATE ProductVariants SET ${setters.join(",")} WHERE id = ? RETURNING *;`;
-    console.log("UPDATE SQL: ", sql);
     const response = await turso.execute({ sql, args });
     const variant = translateRow(response.rows[0], response.columns);
     return { variant };
