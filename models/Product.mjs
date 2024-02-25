@@ -181,6 +181,35 @@ async function insertMany(products, returning = false) {
   }
 }
 
+async function deleteOne(id) {
+  try {
+    const deleteTx = await turso.batch(
+      [
+        {
+          sql: "DELETE FROM ProductVariants WHERE product_id = ?",
+          args: [id],
+        },
+        {
+          sql: "DELETE FROM Products WHERE id = ?",
+          args: [id],
+        },
+      ],
+      "write",
+    );
+    let deleteCount = -1;
+    deleteTx.forEach((result) => {
+      deleteCount += result.rowsAffected;
+    });
+
+    console.log(`Deleted ${deleteCount} variants and 1 product...`);
+    return { deleteCount: { variants: deleteCount, products: 1 } };
+  } catch (error) {
+    console.warn("Failed to delete product and its variants...");
+    console.error(error);
+    return { error };
+  }
+}
+
 //creates the Products table
 export const ProductInitializer = async () => {
   return turso.execute(
@@ -200,4 +229,5 @@ export const Product = {
   updateOne,
   getAll,
   getCategory,
+  deleteOne,
 };
