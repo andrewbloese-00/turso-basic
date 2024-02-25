@@ -4,13 +4,13 @@ import { PASS, FAIL, Divider } from "./fmt.mjs";
 import { turso } from "../turso-client.mjs";
 config();
 export async function TestProducts() {
-  await ProductInitializer();
   await testInsertOne();
   await testGetSlug();
   await testUpdateOne();
   await testInsertMany();
   await testGetAll();
   await testGetCategory();
+  await testDeleteOne();
 }
 
 async function testGetSlug() {
@@ -19,7 +19,6 @@ async function testGetSlug() {
   const { product, error } = await Product.getBySlug("test_product");
   console.timeEnd("Get Product via Slug");
   if (error) return FAIL("GET PRODUCT SLUG", error);
-  Divider("Results: Get Product Via Slug");
   return PASS("GET PRODUCT SLUG", product);
 }
 
@@ -97,6 +96,15 @@ async function testGetAll() {
   console.timeEnd("Get All Products ");
   if (error) return FAIL("Get All Products", error);
   return PASS("Get All Products", products);
+}
+
+async function testDeleteOne() {
+  Divider("Products Delete One");
+  console.time("Delete One Product");
+  const { deleteCount, error } = await Product.deleteOne(1);
+  console.timeEnd("Delete One Product");
+  if (error) return FAIL("Delete One Product", error);
+  return PASS("Delete One Product", deleteCount);
 }
 
 export async function DropProducts() {

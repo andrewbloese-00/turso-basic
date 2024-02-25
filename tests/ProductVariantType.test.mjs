@@ -1,7 +1,4 @@
-import {
-  ProductVariantType,
-  ProductVariantTypesInitializer,
-} from "../models/ProductVariantType.mjs";
+import { ProductVariantType } from "../models/ProductVariantType.mjs";
 import { Divider, PASS, FAIL } from "./fmt.mjs";
 import { config } from "dotenv";
 import { turso } from "../turso-client.mjs";
@@ -43,7 +40,7 @@ async function testUpdate() {
 }
 
 export async function DropProductVariantTypes() {
-  Divider("Cleanup");
+  Divider("Cleanup ProductVariantTypes");
   try {
     await turso.execute("DROP TABLE ProductVariantTypes");
     console.log("Successfully dropped test data");
@@ -55,9 +52,6 @@ export async function DropProductVariantTypes() {
 }
 
 export async function ProductVariantTypeTests() {
-  console.time("Initialize ProductVariantTypes");
-  await ProductVariantTypesInitializer();
-  console.timeEnd("Initialize ProductVariantTypes");
   await testInsert();
   await testGet();
   await testUpdate();

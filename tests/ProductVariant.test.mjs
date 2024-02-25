@@ -1,7 +1,4 @@
-import {
-  ProductVariant,
-  ProductVariantInitializer,
-} from "../models/ProductVariant.mjs";
+import { ProductVariant } from "../models/ProductVariant.mjs";
 import { turso } from "../turso-client.mjs";
 import { Divider, FAIL, PASS } from "./fmt.mjs";
 
@@ -34,7 +31,7 @@ async function testUpdate() {
 }
 
 export async function DropProductVariants() {
-  Divider("Cleanup");
+  Divider("Cleanup ProductVariants");
   try {
     await turso.execute("DROP TABLE ProductVariants");
     console.log("successfully dropped test data");
@@ -46,9 +43,6 @@ export async function DropProductVariants() {
 }
 
 export async function ProductVariantsTests() {
-  console.time("Initialize Product Variants");
-  await ProductVariantInitializer();
-  console.timeEnd("Initialize Product Variants");
   await testInsertSingle();
   await testJoin();
   await testUpdate();
