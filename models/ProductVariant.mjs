@@ -1,6 +1,7 @@
 //Product functions
 import { turso } from "../turso-client.mjs";
 import { translateRow } from "../utils/fromRows.mjs";
+import { groupBy } from "../utils/groupBy.mjs";
 
 /**
  * @typedef {{id: number, product_id: number, variant_name: string, variant_type: number, price_mod: number}} ProductVariant
@@ -38,7 +39,7 @@ async function getVariants(product_id) {
     for (let row of response.rows) {
       variants.push(translateRow(row, response.columns));
     }
-    return { variants };
+    return { variants: groupBy(variants, "variant_type_name") };
   } catch (error) {
     console.error(error);
     return { error: error.message || error || "Unknown Error" };
@@ -53,6 +54,45 @@ async function insertOne(name, product_id, variant_type_id, price_mod = 0) {
     });
     const variant = translateRow(response.rows[0], response.columns);
     return { variant };
+  } catch (error) {
+    console.error(error);
+    return { error };
+  }
+}
+
+/**
+ * @param {ProductVariant[]} variants
+ */
+async function insertMany(variants, returning = false) {
+  try {
+    //build bulk insert query
+    let sql =
+      "INSERT INTO ProductVariants (product_id,variant_name,variant_type,price_mod) VALUES";
+    const args = [];
+    for (let p = 0; p < variants.length; p++) {
+      const productVariant = variants[p];
+      sql += ` (?,?,?,?)`;
+      if (p !== variants.length - 1) sql += ",";
+      args.push(
+        productVariant.product_id,
+        productVariant.variant_name,
+        productVariant.variant_type,
+        productVariant.price_mod,
+      );
+    }
+    if (returning) sql += " RETURNING *";
+    console.log(sql);
+    console.log(args);
+    const response = await turso.execute({ sql, args });
+    if (returning) {
+      /**@type {ProductVariant[]} */
+      const productVariants = [];
+      for (let row of response.rows) {
+        productVariants.push(translateRow(row, response.columns));
+      }
+      return { productVariants };
+    }
+    return { success: true };
   } catch (error) {
     console.error(error);
     return { error };
@@ -90,6 +130,21 @@ async function updateOne(id, productVariantUpdate) {
   }
 }
 
+async function deleteOne(id) {
+  try {
+    const reply = await turso.execute({
+      sql: `DELETE FROM ProductVariants WHERE id = ?`,
+      args: [id],
+    });
+    if (reply.rowsAffected === 0) throw new Error("Query Affected No Rows...");
+    return { success: true };
+  } catch (error) {
+    console.warn("Failed to delete product varaint...");
+    console.error(error);
+    return { error };
+  }
+}
+
 //creates the product variants table
 export const ProductVariantInitializer = async () => {
   return turso.execute(
@@ -104,6 +159,8 @@ export const ProductVariantInitializer = async () => {
 
 export const ProductVariant = {
   insertOne,
+  insertMany,
   getVariants,
   updateOne,
+  deleteOne,
 };
