@@ -168,11 +168,11 @@ async function insertMany(products, returning = false) {
     console.log(args);
     const response = await turso.execute({ sql, args });
     if (returning) {
-      const products = [];
+      const real_products = [];
       for (let row of response.rows) {
-        products.push(translateRow(row, response.columns));
+        real_products.push(translateRow(row, response.columns));
       }
-      return { products };
+      return { products: real_products };
     }
     return { success: true };
   } catch (error) {
