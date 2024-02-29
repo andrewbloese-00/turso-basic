@@ -81,6 +81,29 @@ async function updateOne(id, productVariantTypeUpdate) {
   }
 }
 
+async function deleteOne(id) {
+  try {
+    const deleteTxn = await turso.batch([
+      {
+        sql: "DELETE FROM ProductVariants WHERE variant_type = ?",
+        args: [id],
+      },
+      {
+        sql: "DELETE FROM ProductVariantTypes WHERE id = ?",
+        args: [id],
+      },
+    ]);
+    let affected = -1;
+    deleteTxn.forEach((result) => (affected += result.rowsAffected));
+    const deleteCount = { variants_types: 1, variants: affected };
+    return { deleteCount };
+  } catch (error) {
+    console.warn("Failed to delete product varaint...");
+    console.error(error);
+    return { error };
+  }
+}
+
 //creates the product variants table
 export const ProductVariantTypesInitializer = async () => {
   return turso.execute(
@@ -97,4 +120,5 @@ export const ProductVariantType = {
   createOne,
   getById,
   updateOne,
+  deleteOne,
 };
