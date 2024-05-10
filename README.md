@@ -3,15 +3,15 @@
 Currently just playing around with turso to get a feel for building with it.
 
 ## So Far
-✅ Password Hashing / Verification  using
-✅ Basic Products table
-✅ Basic Users table
-✅ api routes for
-    ✅ Creating a new Product
-    ✅ Sign Up with Email And Password
-    ✅ Login With Email And Password
-✅ setup session middleware
-✅ Table(s) for Product Variants and Variant Types
+- [x] Password Hashing / Verification  using
+- [x] Basic Products table
+- [x] Basic Users table
+- [x] api routes for
+    - [x] Creating a new Product
+    - [x] Sign Up with Email And Password
+    - [x] Login With Email And Password
+- [x] setup session middleware
+- [x] Table(s) for Product Variants and Variant Types
 ## ToDo
-- Product Asset Storage
-- Implment Table for Product Metadata
+- [ ] Product Asset Storage
+- [ ] Implment Table for Product Metadata
